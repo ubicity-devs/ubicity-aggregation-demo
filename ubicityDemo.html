@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html manifest="" lang="en-US">
+<head>
+	<title>Ubicity Showcase - TweetsClient</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta charset="UTF-8">
+
+	<!--  STYLES  -->
+	<link rel="stylesheet" href="css/at/ac/ait/tweetsClient/main.css" />
+	<link rel="stylesheet" href="css/com/leaflet/leaflet.css" />
+	<link rel="stylesheet" href="css/com/leaflet/leaflet.cluster.css" />
+	<link rel="stylesheet" href="css/com/leaflet/leaflet.draw.css" />
+	<link rel="stylesheet" href="css/at/ac/ait/d3/d3.zoomablearea.css" />
+	<link rel="stylesheet" href="css/com/dialog/dialog_box.css" />
+
+	<!--  SCRIPTS  --> 
+	<script type="text/javascript" charset="utf-8" src="js/at/ac/ait/tweetsClient/config.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/at/ac/ait/tweetsClient/dialog_box.js"></script>
+	<script data-main="js/main" src="js/com/require/require.js"></script>
+<!-- 	<script type="text/javascript" src="http://widgets.feedzilla.com/news/iframe/js/widget.js"></script> -->
+
+	<!--  INLINE STYLES -->
+	<style type="text/css">
+	</style>
+
+</head>
+<body>
+
+	<div id="header">
+		<table cellpadding="0px" cellspacing="0px" width="100%"> 
+			<tr> 
+			  <td>
+				<img src="img/logo.jpg" width="180em" height="65em" />
+			  </td>
+			  <td>
+				<h2 align="middle" style="color:#781f19; font-family:Arial">Ubicity Demo Application</h2>
+			  </td>
+			  <td>
+				<img src="img/a_logo_mit_claim_c1_rgb.jpg" width="200em" height="65em" align="right" />		
+			  </td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="search">
+		<table cellpadding="0px" cellspacing="0px"> 
+			<tr> 
+			  <td>
+				<table cellpadding="0px" cellspacing="0px" align="left"> 
+					<tr> 
+					  <td>
+						<input id="search_input" type="search" placeholder="search" title="Enter search string for analyzing tweets." class="tftextinput">
+					  </td>
+					  <td>
+						<input id="search_button" type="button" value="search" class="tfbutton">
+		<!--  				<input id="search_wildcard" type="checkbox"> -->
+		<!--  				<label for = "search_wildcard">Wildcard search</label> -->
+					  </td>
+					</tr>
+				</table>
+			  </td>
+			  <td>
+				<span id="query_output" class="tfqueryoutput" align="center"></span>
+			  </td>
+			  <td>
+			  	<div id="newsticker" class="feedzilla-news-widget feedzilla-3862288056407124" align="right">
+			  </td>
+			</tr>
+		</table>
+	</div>
+
+	<div>
+		<table cellpadding="0px" cellspacing="0px"> 
+			<tr> 
+			  <td>
+				<div id="map">Twitter</div>	
+			  </td>
+			  <td>
+				<table cellpadding="0px" cellspacing="0px"> 
+					<tr> 
+					  <td>
+						<div id="slideshow">Flickr</div>
+					  </td>
+					  <td>
+						<div id="whatever">
+							<h2 id="whatever_text">Other<br>Sources?</h2>
+						</div>
+					  </td>
+					</tr>
+				</table>
+			  </td>
+			</tr>
+			<tr> 
+			  <td>
+				<div id="data"></div>	
+			  </td>
+			  <td>
+				<div id="wikipedia" style="color:white">Wikipedia</div>
+			  </td>
+			</tr>
+		</table>
+	</div>
+	<div id="footer">
+		<b style="font-size:70%; color:#781f19; font-family:Arial">© 2014 AIT Austrian Institute of Technology GmbH. All rights reserved.</b>
+	</div>
+
+</body>
+</html>
