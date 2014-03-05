@@ -66,7 +66,7 @@ define('slideshow', function () {
 			if (s.value != undefined && s.value != null && s.value != '') {
 				// retrieve flickr objects:
 				cursor_wait();
-			    data.getFlickrImages(s.value, 
+			    data.getFlickrImages(s.value.trim(), 
 			    		wcChecked, 
 			    		function(data) {
 							cursor_default();
@@ -88,7 +88,7 @@ define('slideshow', function () {
 			var s = document.getElementById(config.divElementId);
 			var nrOfImages = rows.length;
 
-			$("#slideshow").empty();
+			Slideshow.reset();
 			
 			for (var n = 0; n < nrOfImages; n++) {
 				// check for image redirect:
@@ -101,6 +101,13 @@ define('slideshow', function () {
 			$("#slideshow > div:gt(0)").hide();
 
 		},
+		
+		/**
+		 * @short Reset slideshow
+		 */
+		reset : function() {
+			$("#slideshow").empty();
+		}
 		
 		// ---------------------------------------------------------------------------------------------------
 

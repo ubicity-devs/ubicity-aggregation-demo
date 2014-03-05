@@ -110,6 +110,9 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			    bboxLayer = layer;
 			    drawnItems.addLayer(layer);
 			    Map.searchTweets();
+				slideshow.searchFlickr();
+				wikipedia.searchWikipedia();
+				newsticker.showNews(document.getElementById(config.searchFieldId).value);
 			});
 			
 			map.on('draw:drawstart', function (e) {
@@ -121,7 +124,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			    
 			});
 
-			map.on('click', Map.onMapClick);
+//			map.on('click', Map.onMapClick);
 			
 			// event handlers for search field and button:
 			var s = document.getElementById(config.searchFieldId);
@@ -181,26 +184,36 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			    		wcChecked, 
 			    		location, 
 			    		distance, 
-			    		function(data) {
+			    		function(data, count) {
 							cursor_default();
-							var qo = document.getElementById(config.queryOutputId);
-							qo.innerHTML= "Query result: " + data.hits.hits.length + " hits in " + data.took + " milliseconds.";
-							if (data.hits.total == 0) {
-								// no tweets found
-								showDialog('Ubicity Tweets', '<br><br>There are no tweets matching your search string.', 'warning');
-								Map.addPoints(data);
-								Map.updateDiagram(data);
-							} else if (data.hits.total > config.maxMarkers) {
-								//alert("Too many search results, please limit search area!");
-								showDialog('Ubicity Tweets', '<br><br>There are ' + data.hits.total + ' tweets matching your search string.<br><br>Please limit the search area!', 'warning');
-								data.hits.total = 0;
-								Map.addPoints(data);
-								Map.updateDiagram(data);
+							var status = {
+									count : '0',
+									took : '0'
+							};
+							if (data == null) {
+								if (count == 0) {
+									// no tweets found
+									showDialog('Ubicity Tweets', '<br><br>There are no tweets matching your search string.', 'warning');
+									Map.addPoints(data);
+									Map.updateDiagram(data);
+								} else if (count > config.maxMarkers) {
+									//alert("Too many search results, please limit search area!");
+									status.count = count;
+									showDialog('Ubicity Tweets', '<br><br>There are ' + data.hits.total + ' tweets matching your search string.<br><br>Please limit the search area!', 'warning');
+									data.hits.total = 0;
+									Map.addPoints(data);
+									Map.updateDiagram(data);
+								}
 							} else {
+								count = data.hits.hits.length;
+								status.count = count;
+								status.took = data.took;
 						    	// add markers to map:
 						    	Map.addPoints(data);
 							    Map.updateDiagram(data);
 							}
+							var qo = document.getElementById(config.queryOutputId);
+							qo.innerHTML= "Query result: " + status.count + " hits in " + status.took + " milliseconds.";
 					    },
 					    timeFilter);
 			} else {
@@ -213,23 +226,25 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 		/**
 		 * @short Add points to the map
 		 */
-		addPoints : function(rows, cont) {
-			if (cont == undefined  || cont == false) {
-				if (markers != null) {
-					map.removeLayer(markers);
+		addPoints : function(rows) {
+			if (markers != null) {
+				map.removeLayer(markers);
+				if (rows == null || rows.hits == undefined) {
+					return;
 				}
-				markers = new L.MarkerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: false});
 			}
+			markers = new L.MarkerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: false});
 			
 			var nrOfPoints = rows.hits.hits.length;
 			var array = [];
 
 			for (var i = 0; i < nrOfPoints; i++) {
-				var lat = rows.hits.hits[i].fields.geo.coordinates[0];
-				var lon = rows.hits.hits[i].fields.geo.coordinates[1];
+				var s = rows.hits.hits[i].fields;
+				var lat = s["geo.coordinates"][0];
+				var lon = s["geo.coordinates"][1];
 				var marker = L.marker(new L.LatLng(lat, lon), { title: "Tweet" });
-				var dateStr = rows.hits.hits[i].fields.created_at;
-				marker.bindPopup('Tweet text: ' + rows.hits.hits[i].fields.text + '<br><br>Created at: ' + new Date(parseTwitterDate(dateStr)));
+				var dateStr = s.created_at[0];
+				marker.bindPopup('Tweet text: ' + s.text[0] + '<br><br>Created at: ' + new Date(parseTwitterDate(dateStr)));
 				array.push(marker);
 			}
 			markers.addLayers(array);
@@ -304,7 +319,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 		// ---------------------------------------------------------------------------------------------------
 		
 		/**
-		 * @short Add points to the map
+		 * @short Delete points from map
 		 */
 		deletePoints : function() {
 			if (markers != null) {

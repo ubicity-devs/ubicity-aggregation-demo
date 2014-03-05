@@ -19,23 +19,36 @@ along with this program. If not, see http://www.gnu.org/licenses/agpl-3.0.html
 /**
  * @short This package defines elastic search interaction routines
  */
-define('data', ['jquery', 'zoomablearea'], function () {
+define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 
 	// internal configuration object
 	var config = {
-			esUrl: 'http://ubicity.ait.ac.at:9200/geo_tweets/ctweet/',
-			wikipediaUrl: 'http://ubicity.ait.ac.at:9200/wikipedia/page/',
+			esUrl: 'http://ubicity.ait.ac.at:9200/',
+			twitter : {
+				index: 'geo_tweets',
+				type: 'ctweet'
+			},
+			wikipedia: {
+				index: 'wikipedia',
+				type: 'page'
+			},
 			flickrUrl: {
-				prefix: 'http://ubicity.ait.ac.at:9200/_jitindex?q=(',
+				prefix: '_jitindex?q=(',
 				postfix: ')&m=flickr'
 			},
-			imagesUrl: "http://ubicity.ait.ac.at:9200/flickr/",
+			flickr: {
+				index: 'flickr',
+				type : ''
+			},
 			maxQueryResults: 50000,
-			demoSize: 10000
+			demoSize: 10000,
 	};
 	
 	var jQuery = require('jquery');
 	var zoomablearea = require('zoomablearea');
+	var ejs = require('elasticsearch');
+	
+	var esClient = null;
 
 	jQuery.support.cors = true;
 	
@@ -44,15 +57,27 @@ define('data', ['jquery', 'zoomablearea'], function () {
 
 		// ---------------------------------------------------------------------------------------------------
 		
-		/**
+
+    	/**
+    	 * @short Initialize the data object. The init()-Function is called in this file, right before the return statement
+    	 */
+    	init : function() {
+    		/* setup client */
+			esClient = new ejs.Client({
+				host: config.esUrl,
+			    log: 'debug'
+			  });
+    	},
+    	
+    	/**
 		 * @short Retrieve tweets filtered by a text string from ubicity
 		 */
 		getTweets : function(filterString, wildcard, location, distance, callback, timeFilter) {
-//			log("filterString: " + filterString);
-//			log("wildcard: " + wildcard);
-//			log("location: " + location);
-//			log("distance: " + distance);
-//			log("timeFilter: " + JSON.stringify(timeFilter));
+			log("filterString: " + filterString);
+			log("wildcard: " + wildcard);
+			log("location: " + JSON.stringify(location));
+			log("distance: " + distance);
+			log("timeFilter: " + JSON.stringify(timeFilter));
 			
 			var query = {
 					'match_all' : {}
@@ -61,11 +86,13 @@ define('data', ['jquery', 'zoomablearea'], function () {
 			var must = [];
 			if (filterString != undefined && filterString != null && filterString != '') {
 				if (wildcard) {
-					must = [{'wildcard': {'text': filterString}}];
+					must = [{'wildcard': {'ctweet.text': filterString}}];
 				} else {
 					var a = filterString.split(' ');
 					for (var i = 0; i < a.length; i++) {
-						must.push({'text': {'text': a[i]}});
+						if (a[i] != undefined && a[i] != null && a[i] != '') {
+							must.push({'term': {'ctweet.text': a[i].trim().toLowerCase()}});
+						}
 					}
 				}
 			}
@@ -88,23 +115,18 @@ define('data', ['jquery', 'zoomablearea'], function () {
 						}				
 					}
 				};
-			// log("Query: " + JSON.stringify(query));
-			var fields = ['geo', 'created_at', 'text'];
-			var sort = [
-			            {
-			            	'created_at' : {
-			            		'order' : 'desc'
-			            	}
-			            }
-			            ]
-
 			
-			if (location != null && distance != 0) {
+			var fields = ['geo.coordinates', 'created_at', 'text'];
+			var sort = [{
+            	'created_at' : {
+            		'order' : 'desc'
+            	}
+            }];
+			
+			if (location != null && distance != 0) { // filtered query by geographical area
 				var filteredQuery = {
-					'fields': fields,
 					'query' : {
 					},
-					'sort' : sort
 				};
 				filteredQuery.query.filtered = query;
 				filteredQuery.query.filtered.filter = {
@@ -118,52 +140,67 @@ define('data', ['jquery', 'zoomablearea'], function () {
 		                'distance_type' : 'arc'
 		            }
 				};
-				jQuery.post(config.esUrl + '_search?search_type=count', JSON.stringify(filteredQuery), function(data) {
-//					log("Count Query:");
-//					log("Count: " + data.hits.total);
-//					log("Time: " + data.took);
-					if (data.hits.total == 0) {
-						callback(data);
-					} 
-					else if (data.hits.total > config.maxQueryResults) {
-						callback(data);
-					} else {
-						filteredQuery.size = data.hits.total;
-						// log("FilteredQuery: " + JSON.stringify(filteredQuery));
-						jQuery.post(config.esUrl + '_search', JSON.stringify(filteredQuery), function(data) {
-//							log("Search Query:");
-//							log("Count: " + data.hits.total);
-//							log("Time: " + data.took);
-							callback(data);
-						});
-					}
-				}).fail(function(xhr, status, errorThrown) {alert('Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText);});
-			} else {
-				// log("Query: " + JSON.stringify(query));
-				jQuery.post(config.esUrl + '_search?search_type=count', JSON.stringify(query), function(data) {
-//					log("Count Query:");
-//					log("Count: " + data.hits.total);
-//					log("Time: " + data.took);
-					if (data.hits.total == 0) {
-						callback(data);
-					} 
-					else if (data.hits.total > config.maxQueryResults) {
-						callback(data);
-					} else {
-						query.fields = fields;
-						query.sort = sort;
-//						var size = data.hits.total; For demo reasons (-> performance) we limit size to 5000!!!!
-						var size = config.demoSize;
-						query.size = size;
-						jQuery.post(config.esUrl + '_search', JSON.stringify(query), function(data) {
-//							log("Search Query:");
-//							log("Count: " + data.hits.total);
-//							log("Time: " + data.took);
-							callback(data);
-						});
-					}
-				}).fail(function(xhr, status, errorThrown) {alert('Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText);});
-
+				// first get amount of tweets matching the search query:
+				log("FilteredQuery: " + JSON.stringify(filteredQuery));
+				esClient.count({
+					  index: config.twitter.index,
+					  type: config.twitter.type,
+					  body: filteredQuery
+				}, function (error, resp) {
+						if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
+							callback(null, resp.count);
+						} else {
+							filteredQuery.size = resp.count;
+							filteredQuery.fields = fields;
+							filteredQuery.sort = sort;
+							log("FilteredQuery: " + JSON.stringify(filteredQuery));
+							esClient.search({
+								  index: config.twitter.index,
+								  type: config.twitter.type,
+								  body: filteredQuery
+								}).then(function (resp) {
+										log("Search Query:");
+										log("Count: " + resp.hits.total);
+										log("Time: " + resp.took);
+										callback(resp);
+									});
+								}
+						}, function (err) {
+							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+						}
+					);
+			} else { // query not filtered by geographical area nor by time
+				// first get amount of tweets matching the search query:
+				esClient.count({
+					  index: config.twitter.index,
+					  type: config.twitter.type,
+					  body: query
+				}, function (error, resp) {
+						if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
+							callback(null, resp.count);
+						} else {
+							query.fields = fields;
+							query.sort = sort;
+							var size = resp.count; 
+							// For demo reasons (-> performance) we limit size!!!
+							var size = config.demoSize;
+							query.size = size;
+							log("Twitter Query: " + JSON.stringify(query));
+							esClient.search({
+								  index: config.twitter.index,
+								  type: config.twitter.type,
+								  body: query
+								}).then(function (resp) {
+									log("Twitter Search Query:");
+									log("Twitter Count: " + resp.hits.total);
+									log("Twitter Time: " + resp.took);
+									callback(resp);
+								});
+							}
+						}, function (err) {
+							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+						}
+					);
 			}
 
 		},
@@ -175,7 +212,9 @@ define('data', ['jquery', 'zoomablearea'], function () {
 		 */
 		getFlickrImages : function(filterString, wildcard, callback) {
 
-			jQuery.get(config.flickrUrl.prefix + filterString + config.flickrUrl.postfix, '', function(data) {
+			// create new es index for filterString on server
+			var url = config.esUrl + config.flickrUrl.prefix + filterString + config.flickrUrl.postfix;
+			jQuery.get(url, '', function(data) {
 				var query = {
 						'query': {
 							'bool': {
@@ -187,23 +226,32 @@ define('data', ['jquery', 'zoomablearea'], function () {
 				var filterWithoutSpaces = filterString.replace(/\s+/g,"").toLowerCase();
 				(function loopsiloop(){
 					   setTimeout(function(){
-						   jQuery.post(config.imagesUrl + filterWithoutSpaces + '/_search', JSON.stringify(query), function(data) {
-							   if (data.hits.hits.length > 0) {
-								   var images = [];
-								   for (var i = 0; i < data.hits.hits.length; i++) {
-										images.push(data.hits.hits[i]._source.url);
-									}
-									callback(images);
-							   } else {
-					               loopsiloop(); // recurse
-							   }
-				           }).fail(function(xhr, status, errorThrown) {
-				        	   alert('Error when calling Flickr index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText);
-				           }
+							log("Flickr Query: " + JSON.stringify(query));
+							esClient.search({
+								  index: config.flickr.index,
+								  type: filterWithoutSpaces,
+								  body: query
+								}).then(function (resp) {
+									if (resp.hits.hits.length > 0) {
+										   var images = [];
+										   for (var i = 0; i < resp.hits.hits.length; i++) {
+												images.push(resp.hits.hits[i]._source.url);
+											}
+											callback(images);
+									   } else {
+							               loopsiloop(); // recurse
+									   }
+								}, function (err) {
+									Slideshow.reset();
+									showDialog('Ubicity Demo', 'Error when calling Flickr index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+								})
+							}, 1000
 				       );
-				   }, 1000);
-				})();
-			}).fail(function(xhr, status, errorThrown) {alert('Error when indexing Flickr content!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText);});
+				   })();
+			}).fail(function(xhr, status, errorThrown) {
+				Slideshow.reset();
+				showDialog('Ubicity Demo', 'Error when indexing Flickr content!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+			});
 		},
 		
 		// ---------------------------------------------------------------------------------------------------
@@ -212,18 +260,17 @@ define('data', ['jquery', 'zoomablearea'], function () {
 		 * @short Retrieve Wikipedia pages and links filtered by a text string from ubicity
 		 */
 		getWikipedia : function(filterString, wildcard, callback) {
+			
 			var query = {
 					'match_all' : {}
 			};
 
 			var must = [];
 			if (filterString != undefined && filterString != null && filterString != '') {
-				if (wildcard) {
-					must = [{'wildcard': {'page.title': filterString}}];
-				} else {
-					var a = filterString.split(' ');
-					for (var i = 0; i < a.length; i++) {
-						must.push({'text': {'page.title': a[i]}});
+				var a = filterString.split(' ');
+				for (var i = 0; i < a.length; i++) {
+					if (a[i] != undefined && a[i] != null && a[i] != '') {
+						must.push({'term': {'title': a[i].trim().toLowerCase()}});
 					}
 				}
 			}
@@ -234,28 +281,37 @@ define('data', ['jquery', 'zoomablearea'], function () {
 						}				
 					}
 				};
-			 log("Query: " + JSON.stringify(query));
-			var fields = ['title', 'link', 'special'];
-			jQuery.post(config.wikipediaUrl + '_search?search_type=count', JSON.stringify(query), function(data) {
-				log("Count Query:");
-				log("Count: " + data.hits.total);
-				log("Time: " + data.took);
-				if (data.hits.total == 0) {
-					showDialog('Ubicity Tweets', '<br><br>There are no wikipedia pages matching your search string.', 'warning');
-					cursor_default();
-				} else {
-					query.fields = fields;
-					var size = data.hits.total;
-					query.size = size;
-					jQuery.post(config.wikipediaUrl + '_search', JSON.stringify(query), function(data) {
-						log("Search Query:");
-						log("Count: " + data.hits.total);
-						log("Time: " + data.took);
-						callback(data);
-					});
-				}
-			}).fail(function(xhr, status, errorThrown) {alert('Error when calling Wikipedia index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText);});
-
+			log("Wikipedia Count Query: " + JSON.stringify(query));
+			esClient.count({
+				  index: config.wikipedia.index,
+				  type: config.wikipedia.type,
+				  body: query
+			}, function (error, resp) {
+					if (resp.count == 0) {
+						Data.deleteWikipediaGraph();
+						cursor_default();
+						showDialog('Ubicity Demo', '<br><br>There are no wikipedia pages matching your search string.', 'warning');
+					} else {
+						var fields = ['title', 'link', 'special'];
+						query.fields = fields;
+						log("Wikipedia Query: " + JSON.stringify(query));
+						esClient.search({
+							  index: config.wikipedia.index,
+							  type: config.wikipedia.type,
+							  body: query
+							}).then(function (resp) {
+								callback(resp.hits.hits);
+							}, function (err) {
+								Data.deleteWikipediaGraph();
+								showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+							});
+						}
+					}
+				);
+		},
+		
+		deleteWikipediaGraph : function() {
+			$("#wikipedia").empty();
 		},
 		
 		// ---------------------------------------------------------------------------------------------------
@@ -265,17 +321,19 @@ define('data', ['jquery', 'zoomablearea'], function () {
 		 */
 		updateDiagram : function(data) {
 			// update d3 diagram:
-			var hits = data.hits.hits.reverse();
-			if (hits.length > 0) {
+			if (data == null || data.hits == undefined) {
+				zoomablearea.reset();
+			} else {
+				var hits = data.hits.hits.reverse();
 				var diagramData = new Array();
 				var hitDate = null;
 				var day_i = null;
 				// initalize diagramData with value=0 for each hour between minimum and maximum tweets dates
-				hitDate = new Date(parseTwitterDate(hits[0].fields.created_at));
+				hitDate = new Date(parseTwitterDate(hits[0].fields.created_at[0]));
 				// log("minHit: " + JSON.stringify(hitDate));
 				var minDate = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), 1);
 				// log("minDate: " + JSON.stringify(minDate));
-				hitDate = new Date(parseTwitterDate(hits[hits.length - 1].fields.created_at));
+				hitDate = new Date(parseTwitterDate(hits[hits.length - 1].fields.created_at[0]));
 				// log("maxHit: " + JSON.stringify(hitDate));
 				var maxDate = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), 24);
 				// log("maxDate: " + JSON.stringify(maxDate));
@@ -291,7 +349,7 @@ define('data', ['jquery', 'zoomablearea'], function () {
 					 * since we want to scale down to hourly values only, we eliminate minutes and seconds
 					 * from the date string:
 					 */
-					hitDate = new Date(parseTwitterDate(hits[i].fields.created_at));
+					hitDate = new Date(parseTwitterDate(hits[i].fields.created_at[0]));
 					day_i = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), hitDate.getHours());
 					for (var j = 0; j < diagramData.length; j++){
 						if (diagramData[j].date.getTime() == day_i.getTime()) {
@@ -304,11 +362,12 @@ define('data', ['jquery', 'zoomablearea'], function () {
 					log(JSON.stringify(diagramData[j]));
 				}
 */
-			} else {
-				zoomablearea.reset();
 			}
 		},
     };
+    
+    // initialize the object 
+    Data.init();
     
     return Data;
 });

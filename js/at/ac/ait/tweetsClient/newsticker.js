@@ -54,7 +54,7 @@ define('newsticker', function () {
 				scrollbar: 'false',
 				theme: 'start',
 				className: 'feedzilla-3862288056407124',
-				q: filterString
+				q: filterString.trim()
 			});
 		}
     };
