@@ -146,28 +146,40 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					  index: config.twitter.index,
 					  type: config.twitter.type,
 					  body: filteredQuery
-				}, function (error, resp) {
-						if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
-							callback(null, resp.count);
+				}, function (error, resp, status) {
+						if (error || resp == null) {
+							console.log(JSON.stringify(error));
+							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status +'\n', 'error');
 						} else {
-							filteredQuery.size = resp.count;
-							filteredQuery.fields = fields;
-							filteredQuery.sort = sort;
-							log("FilteredQuery: " + JSON.stringify(filteredQuery));
-							esClient.search({
-								  index: config.twitter.index,
-								  type: config.twitter.type,
-								  body: filteredQuery
-								}).then(function (resp) {
-										log("Search Query:");
-										log("Count: " + resp.hits.total);
-										log("Time: " + resp.took);
-										callback(resp);
-									});
+							if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
+								callback(null, resp.count);
+							} else {
+								filteredQuery.size = resp.count;
+								filteredQuery.fields = fields;
+								filteredQuery.sort = sort;
+								log("FilteredQuery: " + JSON.stringify(filteredQuery));
+								esClient.search({
+									  index: config.twitter.index,
+									  type: config.twitter.type,
+									  body: filteredQuery
+									}).then(function (resp) {
+										if (resp == null) {
+											cursor_default();
+											showDialog('Ubicity Demo', 'Error when calling Twitter index!\n', 'error');
+										} else {
+											log("Search Query:");
+											log("Count: " + resp.hits.total);
+											log("Time: " + resp.took);
+											callback(resp);
+										}},
+										function (error) {
+											log('Error in search call for Twitter index: ' + error.message); 
+											cursor_default();
+											showDialog('Ubicity Demo', 'Error when calling Twitter index!\n', 'error');
+										});
+									}
 								}
-						}, function (err) {
-							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
-						}
+							}
 					);
 			} else { // query not filtered by geographical area nor by time
 				// first get amount of tweets matching the search query:
@@ -175,7 +187,12 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					  index: config.twitter.index,
 					  type: config.twitter.type,
 					  body: query
-				}, function (error, resp) {
+				}, function (error, resp, status) {
+					if (error || resp == null) {
+						console.log(JSON.stringify(error));
+						cursor_default();
+						showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status +'\n', 'error');
+					} else {
 						if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
 							callback(null, resp.count);
 						} else {
@@ -191,15 +208,24 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 								  type: config.twitter.type,
 								  body: query
 								}).then(function (resp) {
-									log("Twitter Search Query:");
-									log("Twitter Count: " + resp.hits.total);
-									log("Twitter Time: " + resp.took);
-									callback(resp);
+									if (resp == null) {
+										cursor_default();
+										showDialog('Ubicity Demo', 'Error when calling Twitter index!\n', 'error');
+									} else {
+										log("Twitter Search Query:");
+										log("Twitter Count: " + resp.hits.total);
+										log("Twitter Time: " + resp.took);
+										callback(resp);
+									}
+								},
+								function (error) {
+									log('Error in search call for twitter index: ' + error.message); 
+									cursor_default();
+									showDialog('Ubicity Demo', 'Error when calling Twitter index!\n', 'error');
 								});
 							}
-						}, function (err) {
-							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
 						}
+					}
 					);
 			}
 
@@ -232,6 +258,11 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 								  type: filterWithoutSpaces,
 								  body: query
 								}).then(function (resp) {
+									if (resp == null) {
+										Slideshow.reset();
+										cursor_default();
+										showDialog('Ubicity Demo', 'Error when calling Flickr index!\n', 'error');
+									} else {
 									if (resp.hits.hits.length > 0) {
 										   var images = [];
 										   for (var i = 0; i < resp.hits.hits.length; i++) {
@@ -241,9 +272,13 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 									   } else {
 							               loopsiloop(); // recurse
 									   }
-								}, function (err) {
+									}
+								},
+								function (error) {
+									log('Error in search call for Flickr index: ' + error.message); 
 									Slideshow.reset();
-									showDialog('Ubicity Demo', 'Error when calling Flickr index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+									cursor_default();
+									showDialog('Ubicity Demo', 'Error when calling Flickr index!\n', 'error');
 								})
 							}, 1000
 				       );
@@ -286,7 +321,12 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				  index: config.wikipedia.index,
 				  type: config.wikipedia.type,
 				  body: query
-			}, function (error, resp) {
+			}, function (error, resp, status) {
+				if (error || resp == null) {
+					console.log(JSON.stringify(error));
+					Data.deleteWikipediaGraph();
+					showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n' + error + '\n' + status +'\n', 'error');
+				} else {
 					if (resp.count == 0) {
 						Data.deleteWikipediaGraph();
 						cursor_default();
@@ -300,14 +340,22 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 							  type: config.wikipedia.type,
 							  body: query
 							}).then(function (resp) {
-								callback(resp.hits.hits);
-							}, function (err) {
-								Data.deleteWikipediaGraph();
-								showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n' + errorThrown+'\n'+status+'\n'+xhr.statusText, 'error');
+								if (resp == null) {
+									cursor_default();
+									showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n', 'error');
+								} else {
+									callback(resp.hits.hits);
+								}
+							},
+							function (error) {
+								log('Error in search call for Wikipedia index: ' + error.message);
+								cursor_default();								
+								showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n', 'error');
 							});
 						}
 					}
-				);
+				}
+			);
 		},
 		
 		deleteWikipediaGraph : function() {
