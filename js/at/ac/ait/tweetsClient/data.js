@@ -116,7 +116,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					}
 				};
 			
-			var fields = ['geo.coordinates', 'created_at', 'text'];
+			var fields = ['coordinates.coordinates', 'created_at', 'text'];
 			var sort = [{
             	'created_at' : {
             		'order' : 'desc'
@@ -132,10 +132,9 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				filteredQuery.query.filtered.filter = {
 					'geo_distance' : {
 		                'distance' : distance + "km",
-		                'geo.coordinates' : {
-		                	// GeoJSOn definition of lat/long is inverted!
-		                    'lon' : location.lat,
-		                    'lat' : location.lng
+		                'coordinates.coordinates' : {
+		                    'lat' : location.lat,
+		                    'lon' : location.lng
 		                },
 		                'distance_type' : 'arc'
 		            }

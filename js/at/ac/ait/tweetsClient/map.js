@@ -240,8 +240,8 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 
 			for (var i = 0; i < nrOfPoints; i++) {
 				var s = rows.hits.hits[i].fields;
-				var lat = s["geo.coordinates"][0];
-				var lon = s["geo.coordinates"][1];
+				var lat = s["coordinates.coordinates"][1];
+				var lon = s["coordinates.coordinates"][0];
 				var marker = L.marker(new L.LatLng(lat, lon), { title: "Tweet" });
 				var dateStr = s.created_at[0];
 				marker.bindPopup('Tweet text: ' + s.text[0] + '<br><br>Created at: ' + new Date(parseTwitterDate(dateStr)));
