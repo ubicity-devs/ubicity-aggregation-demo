@@ -45,7 +45,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 		
 		initZoom: 5,
 		
-		maxMarkers: 50000
+		maxMarkers: 100000
 
 	};
 	
@@ -155,7 +155,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			}, false);
 			
 			var qo = document.getElementById(config.queryOutputId);
-			qo.innerHTML= "Query result:";
+			qo.innerHTML= "No search query executed";
 
 			zoomablearea.onClick(Map.searchTweets);
 		},
@@ -199,7 +199,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 								} else if (count > config.maxMarkers) {
 									//alert("Too many search results, please limit search area!");
 									status.count = count;
-									showDialog('Ubicity Tweets', '<br><br>There are ' + data.hits.total + ' tweets matching your search string.<br><br>Please limit the search area!', 'warning');
+									showDialog('Ubicity Tweets', '<br><br>There are ' + count + ' (max. ' + config.maxMarkers + ') tweets matching your search string.<br><br>Please limit the search area!', 'warning');
 									data.hits.total = 0;
 									Map.addPoints(data);
 									Map.updateDiagram(data);

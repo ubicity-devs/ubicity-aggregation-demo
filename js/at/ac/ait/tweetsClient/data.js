@@ -23,9 +23,10 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 
 	// internal configuration object
 	var config = {
+			//esUrl: 'http://localhost:9200/',
 			esUrl: 'http://ubicity.ait.ac.at:9200/',
 			twitter : {
-				index: 'geo_tweets',
+				index: 'all_geo_tweets',
 				type: 'ctweet'
 			},
 			wikipedia: {
@@ -40,7 +41,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				index: 'flickr',
 				type : ''
 			},
-			maxQueryResults: 50000,
+			maxQueryResults: 100000,
 			demoSize: 10000,
 	};
 	
@@ -150,7 +151,9 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 							console.log(JSON.stringify(error));
 							showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status +'\n', 'error');
 						} else {
-							if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
+							console.log('Found ' + resp.count + ' twitter entries.');
+						
+							if (resp.count == 0 || resp.count > config.maxQueryResults) {
 								callback(null, resp.count);
 							} else {
 								filteredQuery.size = resp.count;
@@ -192,7 +195,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 						cursor_default();
 						showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status +'\n', 'error');
 					} else {
-						if (resp.count == 0 || (resp.count > config.maxQueryResults)) {
+						if (resp.count == 0 || resp.count > config.maxQueryResults) {
 							callback(null, resp.count);
 						} else {
 							query.fields = fields;
