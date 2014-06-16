@@ -23,8 +23,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 
 	// internal configuration object
 	var config = {
-			//esUrl: 'http://localhost:9200/',
-			esUrl: 'http://ubicity.ait.ac.at:9200/',
+			esUrl: 'http://ubicity.ait.ac.at:8080/es/',
 			twitter : {
 				index: 'all_geo_tweets',
 				type: 'ctweet'

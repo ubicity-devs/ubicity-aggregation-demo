@@ -169,6 +169,10 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 		searchTweets : function(timeFilter) {
 			var location = null;
 			var distance = 0;
+			
+			var qo = document.getElementById(config.queryOutputId);
+			qo.innerHTML= "Loading Tweets ...";
+			
 			if (bboxLayer != null) {
 				location = bboxLayer.getLatLng();
 				distance = bboxLayer.getRadius()/1000;
@@ -194,15 +198,10 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 								if (count == 0) {
 									// no tweets found
 									showDialog('Ubicity Tweets', '<br><br>There are no tweets matching your search string.', 'warning');
-									Map.addPoints(data);
-									Map.updateDiagram(data);
 								} else if (count > config.maxMarkers) {
 									//alert("Too many search results, please limit search area!");
 									status.count = count;
 									showDialog('Ubicity Tweets', '<br><br>There are ' + count + ' (max. ' + config.maxMarkers + ') tweets matching your search string.<br><br>Please limit the search area!', 'warning');
-									data.hits.total = 0;
-									Map.addPoints(data);
-									Map.updateDiagram(data);
 								}
 							} else {
 								count = data.hits.hits.length;
