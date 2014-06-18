@@ -24,6 +24,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 	// internal configuration object
 	var config = {
 			esUrl: 'http://ubicity.ait.ac.at:8080/es/',
+			//esUrl: 'http://localhost:9200/',
 			twitter : {
 				index: 'all_geo_tweets',
 				type: 'ctweet'
@@ -41,7 +42,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				type : ''
 			},
 			maxQueryResults: 100000,
-			demoSize: 10000,
+			demoSize: 100000,
 	};
 	
 	var jQuery = require('jquery');

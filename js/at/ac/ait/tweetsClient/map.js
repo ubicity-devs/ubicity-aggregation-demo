@@ -194,6 +194,10 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 									count : '0',
 									took : '0'
 							};
+							
+							// add markers to map
+							Map.addPoints(data);
+							
 							if (data == null) {
 								if (count == 0) {
 									// no tweets found
@@ -207,8 +211,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 								count = data.hits.hits.length;
 								status.count = count;
 								status.took = data.took;
-						    	// add markers to map:
-						    	Map.addPoints(data);
 							    Map.updateDiagram(data);
 							}
 							var qo = document.getElementById(config.queryOutputId);
