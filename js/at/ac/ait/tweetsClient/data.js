@@ -23,10 +23,10 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 
 	// internal configuration object
 	var config = {
-			esUrl: 'http://ubicity.ait.ac.at:8080/es/',
-			//esUrl: 'http://localhost:9200/',
+			//esUrl: 'http://ubicity.ait.ac.at:8080/es/',
+			esUrl: 'http://localhost:9200/',
 			twitter : {
-				index: 'all_geo_tweets',
+				index: 'twitter_all_geo',
 				type: 'ctweet'
 			},
 			wikipedia: {
@@ -87,12 +87,12 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 			var must = [];
 			if (filterString != undefined && filterString != null && filterString != '') {
 				if (wildcard) {
-					must = [{'wildcard': {'ctweet.text': filterString}}];
+					must = [{'wildcard': {'ctweet.msg.text': filterString}}];
 				} else {
 					var a = filterString.split(' ');
 					for (var i = 0; i < a.length; i++) {
 						if (a[i] != undefined && a[i] != null && a[i] != '') {
-							must.push({'term': {'ctweet.text': a[i].trim().toLowerCase()}});
+							must.push({'term': {'ctweet.msg.text': a[i].trim().toLowerCase()}});
 						}
 					}
 				}
@@ -117,7 +117,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					}
 				};
 			
-			var fields = ['coordinates.coordinates', 'created_at', 'text'];
+			var fields = ['place.geo_point', 'created_at', 'msg.text', 'user.name'];
 			var sort = [{
             	'created_at' : {
             		'order' : 'desc'
@@ -133,7 +133,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				filteredQuery.query.filtered.filter = {
 					'geo_distance' : {
 		                'distance' : distance + "km",
-		                'coordinates.coordinates' : {
+		                'place.geo_point' : {
 		                    'lat' : location.lat,
 		                    'lon' : location.lng
 		                },
@@ -379,11 +379,11 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				var hitDate = null;
 				var day_i = null;
 				// initalize diagramData with value=0 for each hour between minimum and maximum tweets dates
-				hitDate = new Date(parseTwitterDate(hits[0].fields.created_at[0]));
+				hitDate = new Date(hits[0].fields.created_at[0]);
 				// log("minHit: " + JSON.stringify(hitDate));
 				var minDate = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), 1);
 				// log("minDate: " + JSON.stringify(minDate));
-				hitDate = new Date(parseTwitterDate(hits[hits.length - 1].fields.created_at[0]));
+				hitDate = new Date(hits[hits.length - 1].fields.created_at[0]);
 				// log("maxHit: " + JSON.stringify(hitDate));
 				var maxDate = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), 24);
 				// log("maxDate: " + JSON.stringify(maxDate));
@@ -399,7 +399,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					 * since we want to scale down to hourly values only, we eliminate minutes and seconds
 					 * from the date string:
 					 */
-					hitDate = new Date(parseTwitterDate(hits[i].fields.created_at[0]));
+					hitDate = new Date(hits[i].fields.created_at[0]);
 					day_i = new Date(hitDate.getFullYear(), hitDate.getMonth(), hitDate.getDate(), hitDate.getHours());
 					for (var j = 0; j < diagramData.length; j++){
 						if (diagramData[j].date.getTime() == day_i.getTime()) {

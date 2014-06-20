@@ -195,8 +195,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 									took : '0'
 							};
 							
-							// add markers to map
-							Map.addPoints(data);
+
 							
 							if (data == null) {
 								if (count == 0) {
@@ -211,6 +210,8 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 								count = data.hits.hits.length;
 								status.count = count;
 								status.took = data.took;
+								// add markers to map
+								Map.addPoints(data);
 							    Map.updateDiagram(data);
 							}
 							var qo = document.getElementById(config.queryOutputId);
@@ -241,11 +242,11 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 
 			for (var i = 0; i < nrOfPoints; i++) {
 				var s = rows.hits.hits[i].fields;
-				var lat = s["coordinates.coordinates"][1];
-				var lon = s["coordinates.coordinates"][0];
-				var marker = L.marker(new L.LatLng(lat, lon), { title: "Tweet" });
+				var lat = s["place.geo_point"][1];
+				var lon = s["place.geo_point"][0];
+				var marker = L.marker(new L.LatLng(lat, lon), { title: "Tweet from " + s["user.name"]});
 				var dateStr = s.created_at[0];
-				marker.bindPopup('Tweet text: ' + s.text[0] + '<br><br>Created at: ' + new Date(parseTwitterDate(dateStr)));
+				marker.bindPopup('Text: ' + s["msg.text"] + '<br/><br/>Created at: ' + new Date(dateStr));
 				array.push(marker);
 			}
 			markers.addLayers(array);
