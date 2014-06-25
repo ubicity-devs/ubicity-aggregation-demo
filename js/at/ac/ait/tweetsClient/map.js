@@ -45,7 +45,7 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 		
 		initZoom: 5,
 		
-		maxMarkers: 100000
+		maxMarkers: 10000
 
 	};
 	
