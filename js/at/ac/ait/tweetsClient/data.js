@@ -143,7 +143,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				// first get amount of tweets matching the search query:
 				log("FilteredQuery: " + JSON.stringify(filteredQuery));
 				esClient.count({
-					  index: config.twitter.index,
+					  index: calculateDailyIndex(config.twitter.index),
 					  type: config.twitter.type,
 					  body: filteredQuery
 				}, function (error, resp, status) {
@@ -161,7 +161,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 								filteredQuery.sort = sort;
 								log("FilteredQuery: " + JSON.stringify(filteredQuery));
 								esClient.search({
-									  index: config.twitter.index,
+									  index: calculateDailyIndex(config.twitter.index),
 									  type: config.twitter.type,
 									  body: filteredQuery
 									}).then(function (resp) {
@@ -186,7 +186,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 			} else { // query not filtered by geographical area nor by time
 				// first get amount of tweets matching the search query:
 				esClient.count({
-					  index: config.twitter.index,
+					  index: calculateDailyIndex(config.twitter.index),
 					  type: config.twitter.type,
 					  body: query
 				}, function (error, resp, status) {
@@ -206,7 +206,7 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 							query.size = size;
 							log("Twitter Query: " + JSON.stringify(query));
 							esClient.search({
-								  index: config.twitter.index,
+								  index: calculateDailyIndex(config.twitter.index),
 								  type: config.twitter.type,
 								  body: query
 								}).then(function (resp) {
@@ -418,7 +418,6 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
     
     // initialize the object 
     Data.init();
-    
     return Data;
 });
 

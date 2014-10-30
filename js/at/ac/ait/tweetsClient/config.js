@@ -18,7 +18,11 @@ along with this program. If not, see http://www.gnu.org/licenses/agpl-3.0.html
 
 var c = {};
 
-
+function calculateDailyIndex(index) {
+	var d = new Date();
+	var dailyIdx = index + "-" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();	
+	return dailyIdx;
+}
 
 function log(msg, origin) {
 	if(origin) {
