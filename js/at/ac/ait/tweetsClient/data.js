@@ -41,8 +41,8 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 				index: 'flickr',
 				type : ''
 			},
-			maxQueryResults: 10000,
-			demoSize: 10000,
+			maxQueryResults: 100000,
+			demoSize: 100000,
 	};
 	
 	var jQuery = require('jquery');

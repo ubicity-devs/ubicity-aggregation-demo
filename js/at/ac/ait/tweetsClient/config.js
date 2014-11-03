@@ -20,7 +20,19 @@ var c = {};
 
 function calculateDailyIndex(index) {
 	var d = new Date();
-	var dailyIdx = index + "-" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();	
+	var dailyIdx = index + "-" + d.getFullYear();
+	var month = d.getMonth() + 1;
+
+	if(month < 10)
+	dailyIdx = dailyIdx + "-0" + month;
+	else	
+	dailyIdx = dailyIdx + "-" + month;
+
+	if(d.getDate() < 10)
+	dailyIdx = dailyIdx + "-0" + d.getDate();
+	else	
+	dailyIdx = dailyIdx + "-" + d.getDate();
+	
 	return dailyIdx;
 }
 
