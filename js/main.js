@@ -1,20 +1,21 @@
 /**
-Copyright (C) 2014 AIT / Austrian Institute of Technology
-http://www.ait.ac.at
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program. If not, see http://www.gnu.org/licenses/agpl-3.0.html
-*/
+ * Copyright (C) 2014 AIT / Austrian Institute of Technology
+ * http://www.ait.ac.at
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see
+ * http://www.gnu.org/licenses/agpl-3.0.html
+ */
 
 require.config({
 
@@ -67,7 +68,7 @@ require.config({
 /**
  * Application execution starts here.
  * 
- * Wait until DOM rendering is complete and all CSS files have been loaded. 
+ * Wait until DOM rendering is complete and all CSS files have been loaded.
  * Trigger the domReady-Event and execute application logic.
  */
 require(['domReady', 'require', 'jquery', 'map', 'd3', 'zoomablearea', 'data', 'slideshow', 'newsticker'], function (domReady, require) {
@@ -80,10 +81,12 @@ require(['domReady', 'require', 'jquery', 'map', 'd3', 'zoomablearea', 'data', '
 			var zoomablearea = require('zoomablearea');
 
 			zoomablearea.init();
+			setDateSearchFields();
 			}
 		   
 		if (navigator.userAgent.match(/(iPad|iPhone|Android)/)) {
-			// This is running on a device so waiting for deviceready event
+			// This is running on a device so waiting for
+			// deviceready event
 			document.addEventListener('deviceready', onDeviceReady, false);
 		} else {
 			// On desktop don't have to wait for anything
@@ -92,5 +95,14 @@ require(['domReady', 'require', 'jquery', 'map', 'd3', 'zoomablearea', 'data', '
 	
 	});
 
+	
+	function setDateSearchFields() {
+		var d = new Date();
+		var day = d.getDate() + "." + d.getMonth() + "." + d.getFullYear();
+		
+		$('#date_from').val(day + " 00:00");
+		$('#date_to').val(day + " " +d.getHours()+ ":" + d.getMinutes());
+	};
+	
 });
 

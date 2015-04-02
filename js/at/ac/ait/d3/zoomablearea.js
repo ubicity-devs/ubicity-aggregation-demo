@@ -31,7 +31,8 @@ define('zoomablearea', ['d3'], function () {
     	
     	init : function(cfg) {
 
-			// Scales. Note the inverted domain for the y-scale: bigger is up!
+			// Scales. Note the inverted domain for the y-scale:
+			// bigger is up!
 			x = d3.time.scale().range([0, w]),
 			y = d3.scale.linear().range([h, 0]),
 			xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-h, 0).tickPadding(2).ticks(6).tickFormat(d3.time.format("%b/%d %H:00")),
@@ -184,7 +185,8 @@ define('zoomablearea', ['d3'], function () {
     	},
     	
     	draw : function(data) {
-			  // Specify the x and y scales shown initially on the screen.
+			  // Specify the x and y scales shown initially on the
+			    // screen.
 			  var maxDate = new Date(data[data.length-1].date);
 			  maxDate.setDate(maxDate.getDate() + 1);
 			  var minDate = new Date(maxDate);
@@ -227,13 +229,13 @@ define('zoomablearea', ['d3'], function () {
     	},
 
     	clicked : function(d) {
-    		var xPos = d3.mouse(this)[0];
+    	    var xPos = d3.mouse(this)[0];
             var ticks = x.ticks(6);
             var leftEdge = x(ticks[0]);
             var width = x(ticks[ticks.length - 1]) - x(ticks[ticks.length - 2]);
             var j;
             for(j=0; xPos > (leftEdge + (width*j) - (width/2)); j++) {}
-                //do nothing, just increment j until case fails
+                // do nothing, just increment j until case fails
             var timeFilter = {};
             var timeFormat = d3.time.format('%a %b %d %H:00:00 %Z %Y');
             timeFilter.from = timeFormat(ticks[j-1]);

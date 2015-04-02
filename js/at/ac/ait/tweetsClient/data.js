@@ -23,8 +23,8 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 
 	// internal configuration object
 	var config = {
-			//esUrl: 'http://ubicity.ait.ac.at:8080/es/',
-			esUrl: 'http://localhost:9200/',
+			esUrl: 'http://ubicity.ait.ac.at:8080/es/',
+			//esUrl: 'http://localhost:9200/',
 			twitter : {
 				index: 'twitter_all_geo',
 				type: 'ctweet'
@@ -408,10 +408,6 @@ define('data', ['jquery', 'zoomablearea', 'elasticsearch'], function () {
 					}
 				}
 				zoomablearea.initData(diagramData);
-/*				for (var j = 0; j < diagramData.length; j++){
-					log(JSON.stringify(diagramData[j]));
-				}
-*/
 			}
 		},
     };
