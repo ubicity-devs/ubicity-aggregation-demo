@@ -14,53 +14,54 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see http://www.gnu.org/licenses/agpl-3.0.html
-*/
+ */
 
 /**
  * @short This package defines the feedzilla news ticker
  */
 
-define('newsticker', function () {
+define('newsticker', function() {
 
-	// internal configuration object
-	var config = {
-			
-			divElementId : "newsticker",
+    // internal configuration object
+    var config = {
 
-	};
-	
-	// The Slideshow object
+	divElementId : "newsticker",
+
+    };
+
+    // The Slideshow object
     var NewsTicker = {
 
-    	// ---------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------------------------------
 
-    	/**
-    	 * @short Initialize the newsticker in the browser. The init()-Function is called in this file, right before the return statement
-    	 */
-		init : function() {
-			NewsTicker.showNews('');
-		},
-		
-		showNews : function(filterString) {
-			new FEEDZILLA.Widget({
-				style: 'ticker',
-				culture_code: 'en_all',
-				title: 'Top News',
-				order: 'relevance',
-				count: '20',
-				w: '600',
-				h: '30',
-				timestamp: 'true',
-				scrollbar: 'false',
-				theme: 'start',
-				className: 'feedzilla-3862288056407124',
-				q: filterString.trim()
-			});
-		}
+	/**
+	 * @short Initialize the newsticker in the browser. The init()-Function
+	 *        is called in this file, right before the return statement
+	 */
+	init : function() {
+	    NewsTicker.showNews('');
+	},
+
+	showNews : function(filterString) {
+	    new FEEDZILLA.Widget({
+		style : 'ticker',
+		culture_code : 'en_all',
+		title : filterString.trim(),
+		order : 'relevance',
+		count : '20',
+		w : '600',
+		h : '30',
+		timestamp : 'true',
+		scrollbar : 'false',
+		theme : 'start',
+		className : 'feedzilla-3862288056407124',
+		q : filterString.trim()
+	    });
+	}
     };
-    
-    // initialize the widget 
+
+    // initialize the widget
     NewsTicker.init();
-    
+
     return NewsTicker;
 });

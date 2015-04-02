@@ -174,7 +174,7 @@ html, body, #map, #slideshow, #whatever {
 	margin:2em;
 }
 
-#data {
+.chart {
 	display: block;
 	box-shadow: 5px 5px 20px #999;
 	background-color: #ffffff;
@@ -183,6 +183,7 @@ html, body, #map, #slideshow, #whatever {
 	margin-left:2em;
 	margin-right:auto;
 	margin-bottom:2em;
+	padding: 1em;
 }
 
 #wikipedia {

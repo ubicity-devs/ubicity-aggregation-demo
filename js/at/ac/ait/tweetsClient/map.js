@@ -52,7 +52,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 	// variable that represents the data module
 	var data = require('data');
 	var jQuery = require('jquery');
-	var zoomablearea = require('zoomablearea');
 	var slideshow = require('slideshow');
 	var wikipedia = require('wikipedia');
 	var newsticker = require('newsticker');
@@ -156,8 +155,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			
 			var qo = document.getElementById(config.queryOutputId);
 			qo.innerHTML= "No search query executed";
-
-			zoomablearea.onClick(Map.searchTweets);
 		},
 		
 		// ---------------------------------------------------------------------------------------------------
