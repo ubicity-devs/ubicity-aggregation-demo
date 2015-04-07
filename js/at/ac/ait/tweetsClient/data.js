@@ -382,6 +382,7 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 	 */
 	updateDiagram : function(data) {
 
+	    var now = new moment();
 	    var n = new moment();
 
 	    // update d3 diagram:
@@ -393,7 +394,7 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 		var cLabel = new Array();
 		var cData = new Array();
 
-		for (var h = 0; h < 24; h++) {
+		for (var h = 0; h <= now.hour()+1; h++) {
 
 		    for (var m = 0; m < 60; m++) {
 			n.millisecond(0);
@@ -403,12 +404,19 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 			cLabel[h * 60 + m] = n.valueOf();
 			cData[h * 60 + m] = 0;
 		    }
-
 		}
 
 		for (var i = 0; i < hits.length; i++) {
 		    hitDate = new Date(hits[i].fields.created_at[0]);
-		    cData[hitDate.getHours()*60 + hitDate.getMinutes()] = cData[hitDate.getHours()*60 + hitDate.getMinutes()] + 1;
+		    
+		    var idx = hitDate.getHours()*60 + hitDate.getMinutes();
+		    
+		    if(idx < cData.length) {
+			 cData[idx] = cData[idx] + 1;
+		    }else{
+			console.warn("Index [" + idx + "] out of bounds of cData");
+		    }
+		   
 		}
 
 		twitterchart.initData(cLabel, cData);
