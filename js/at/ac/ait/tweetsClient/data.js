@@ -24,7 +24,6 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
     // internal configuration object
     var config = {
 	esUrl : 'http://ubicity.ait.ac.at:8080/es/',
-	// esUrl: 'http://localhost:9200/',
 	twitter : {
 	    index : 'twitter_all_geo',
 	    type : 'ctweet'
@@ -33,11 +32,8 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 	    index : 'wikipedia',
 	    type : 'page'
 	},
-	flickrUrl : {
-	    prefix : '_jitindex?q=(',
-	    postfix : ')&m=flickr'
-	},
 	flickr : {
+	    url : 'http://ubicity.ait.ac.at:8080/rest/command/ubicity-flickr?cmd=index&data=',
 	    index : 'flickr',
 	    type : ''
 	},
@@ -50,8 +46,6 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
     var twitterchart = require('twitterchart');
 
     var esClient = null;
-
-    jQuery.support.cors = true;
 
     // The Data object
     var Data = {
@@ -158,10 +152,10 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 		    body : filteredQuery
 		}, function(error, resp, status) {
 		    if (error || resp == null) {
-			console.log(JSON.stringify(error));
+			log(JSON.stringify(error));
 			showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status + '\n', 'error');
 		    } else {
-			console.log('Found ' + resp.count + ' twitter entries.');
+			log('Found ' + resp.count + ' twitter entries.');
 
 			if (resp.count == 0 || resp.count > config.maxQueryResults) {
 			    callback(null, resp.count);
@@ -200,7 +194,7 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 		    body : query
 		}, function(error, resp, status) {
 		    if (error || resp == null) {
-			console.log(JSON.stringify(error));
+			log(JSON.stringify(error));
 			cursor_default();
 			showDialog('Ubicity Demo', 'Error when calling Twitter index!\n' + error + '\n' + status + '\n', 'error');
 		    } else {
@@ -249,8 +243,11 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 	getFlickrImages : function(filterString, wildcard, callback) {
 
 	    // create new es index for filterString on server
-	    var url = config.esUrl + config.flickrUrl.prefix + filterString + config.flickrUrl.postfix;
+	    var url = config.flickr.url + filterString;
+	    
 	    jQuery.get(url, '', function(data) {
+		log(data);
+		
 		var query = {
 		    'query' : {
 			'bool' : {
@@ -271,9 +268,8 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 			    body : query
 			}).then(function(resp) {
 			    if (resp == null) {
-				Slideshow.reset();
 				cursor_default();
-				showDialog('Ubicity Demo', 'Error when calling Flickr index!\n', 'error');
+				showDialog('Ubicity Demo', 'Error when calling Flickr index! (resp=null)\n', 'error');
 			    } else {
 				if (resp.hits.hits.length > 0) {
 				    var images = [];
@@ -287,14 +283,12 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 			    }
 			}, function(error) {
 			    log('Error in search call for Flickr index: ' + error.message);
-			    Slideshow.reset();
 			    cursor_default();
 			    showDialog('Ubicity Demo', 'Error when calling Flickr index!\n', 'error');
 			})
 		    }, 1000);
 		})();
 	    }).fail(function(xhr, status, errorThrown) {
-		Slideshow.reset();
 		showDialog('Ubicity Demo', 'Error when indexing Flickr content!\n' + errorThrown + '\n' + status + '\n' + xhr.statusText, 'error');
 	    });
 	},
@@ -338,7 +332,7 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 		body : query
 	    }, function(error, resp, status) {
 		if (error || resp == null) {
-		    console.log(JSON.stringify(error));
+		    log(JSON.stringify(error));
 		    Data.deleteWikipediaGraph();
 		    showDialog('Ubicity Demo', 'Error when calling Wikipedia index!\n' + error + '\n' + status + '\n', 'error');
 		} else {
@@ -394,7 +388,7 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 		var cLabel = new Array();
 		var cData = new Array();
 
-		for (var h = 0; h <= now.hour()+1; h++) {
+		for (var h = 0; h <= now.hour() + 1; h++) {
 
 		    for (var m = 0; m < 60; m++) {
 			n.millisecond(0);
@@ -408,15 +402,15 @@ define('data', [ 'jquery', 'elasticsearch' ], function() {
 
 		for (var i = 0; i < hits.length; i++) {
 		    hitDate = new Date(hits[i].fields.created_at[0]);
-		    
-		    var idx = hitDate.getHours()*60 + hitDate.getMinutes();
-		    
-		    if(idx < cData.length) {
-			 cData[idx] = cData[idx] + 1;
-		    }else{
+
+		    var idx = hitDate.getHours() * 60 + hitDate.getMinutes();
+
+		    if (idx < cData.length) {
+			cData[idx] = cData[idx] + 1;
+		    } else {
 			console.warn("Index [" + idx + "] out of bounds of cData");
 		    }
-		   
+
 		}
 
 		twitterchart.initData(cLabel, cData);
