@@ -32,7 +32,6 @@ require.config({
 	slideshow : 'at/ac/ait/tweetsClient/slideshow',
 	twitterchart : 'at/ac/ait/tweetsClient/twitterchart',
 	wikipedia : 'at/ac/ait/tweetsClient/wikipedia',
-	newsticker : 'at/ac/ait/tweetsClient/newsticker',
 	leafletCluster : 'com/leaflet/leaflet.cluster',
 	leafletDraw : 'com/leaflet/leaflet.draw',
 	jit : 'com/jit-yc/jit-yc',
@@ -62,9 +61,6 @@ require.config({
 	},
 	wikipedia : {
 	    deps : [ 'data', 'jit', 'jquery' ]
-	},
-	newsticker : {
-	    deps : [ 'feedzilla' ]
 	}
     }
 });
@@ -75,7 +71,7 @@ require.config({
  * Wait until DOM rendering is complete and all CSS files have been loaded.
  * Trigger the domReady-Event and execute application logic.
  */
-require([ 'domReady', 'require', 'jquery', 'map', 'data', 'slideshow', 'newsticker', 'twitterchart' ], function(domReady, require) {
+require([ 'domReady', 'require', 'jquery', 'map', 'data', 'slideshow', 'twitterchart' ], function(domReady, require) {
 
     domReady(function() {
 

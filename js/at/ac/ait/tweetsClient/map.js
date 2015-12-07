@@ -22,7 +22,7 @@ along with this program. If not, see http://www.gnu.org/licenses/agpl-3.0.html
 
 var map = null;
 
-define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia', 'newsticker'], function () {
+define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'], function () {
 
 	// internal configuration object
 	var config = {
@@ -54,7 +54,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 	var jQuery = require('jquery');
 	var slideshow = require('slideshow');
 	var wikipedia = require('wikipedia');
-	var newsticker = require('newsticker');
 	
 	// Map layers:
 	var markers = null;
@@ -111,7 +110,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 			    Map.searchTweets();
 				slideshow.searchFlickr();
 				wikipedia.searchWikipedia();
-				newsticker.showNews(document.getElementById(config.searchFieldId).value);
 			});
 			
 			map.on('draw:drawstart', function (e) {
@@ -133,7 +131,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 					Map.searchTweets();
 					slideshow.searchFlickr();
 					wikipedia.searchWikipedia();
-					newsticker.showNews(s.value);
 				}, false);
 			} else {
 				s.addEventListener('keyup', function(e) {
@@ -141,7 +138,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 						Map.searchTweets();
 						slideshow.searchFlickr();
 						wikipedia.searchWikipedia();
-						newsticker.showNews(s.value);
 					}
 				}, false);
 			}
@@ -150,7 +146,6 @@ define('map', ['leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia'
 				Map.searchTweets();
 				slideshow.searchFlickr();
 				wikipedia.searchWikipedia();
-				newsticker.showNews(s.value);
 			}, false);
 			
 			var qo = document.getElementById(config.queryOutputId);
