@@ -21,7 +21,6 @@ require.config({
 
     // list all available require-objects or JavaScript libraries
     paths : {
-
 	domReady : 'com/require/domready',
 	jquery : 'com/jquery/jquery.min',
 	leaflet : 'com/leaflet/leaflet',
@@ -51,7 +50,7 @@ require.config({
 	    deps : [ 'jquery' ]
 	},
 	map : {
-	    deps : [ 'leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia', 'newsticker', 'jquery', 'twitterchart' ]
+	    deps : [ 'leafletCluster', 'leafletDraw', 'data', 'slideshow', 'wikipedia', 'jquery', 'twitterchart' ]
 	},
 	slideshow : {
 	    deps : [ 'data', 'jquery' ]
